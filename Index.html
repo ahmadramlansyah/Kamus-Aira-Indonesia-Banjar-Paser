@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AIRA v8.0 - Ultimate Translator</title>
+    <style>
+        /* --- CSS: TEMA WHATSAPP MODERN & RESPONSIF --- */
+        :root {
+            --primary-color: #008069;
+            --secondary-color: #00a884;
+            --bg-color: #e5ddd5;
+            --chat-bg-user: #d9fdd3;
+            --chat-bg-aira: #ffffff;
+            --text-main: #111b21;
+            --text-secondary: #667781;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #d1d7db;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden; /* Mencegah scroll body, fokus ke app container */
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* Lebar maksimal ala HP */
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+            /* Background Pattern WhatsApp */
+            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
+            background-blend-mode: soft-light;
+            background-repeat: repeat;
+        }
+
+        /* HEADER SECTION */
+        .header {
+            background-color: var(--primary-color);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            color: white;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 19px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-info h2 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .header-info p {
+            margin: 2px 0 0;
+            font-size: 12px;
+            opacity: 0.85;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* MENU PILIHAN BAHASA */
+        .lang-bar {
+            background: #f0f2f5;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            z-index: 90;
+        }
+
+        .lang-select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            background: white;
+            outline: none;
+            cursor: pointer;
+            color: var(--text-main);
+            font-weight: 500;
+            appearance: none; /* Custom arrow style */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23667781%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 10px auto;
+        }
+
+        /* AREA CHAT (SCROLLABLE) */
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            scroll-behavior: smooth;
+        }
+
+        /* BUBBLE CHAT STYLES */
+        .msg {
+            max-width: 85%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+            margin-bottom: 2px;
+        }
+
+        .msg.aira {
+            align-self: flex-start;
+            background: var(--chat-bg-aira);
+            border-top-left-radius: 0;
+        }
+
+        .msg.user {
+            align-self: flex-end;
+            background: var(--chat-bg-user);
+            border-top-right-radius: 0;
+        }
+
+        .time {
+            float: right;
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            margin-left: 8px;
+            position: relative;
+            top: 2px;
+        }
+
+        /* FOOTER INPUT */
+        .footer {
+            background: #f0f2f5;
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 24px;
+            border: 1px solid white;
+            outline: none;
+            font-size: 15px;
+            background: white;
+            transition: border 0.2s;
+        }
+        
+        .input-field:focus {
+            border-color: var(--secondary-color);
+        }
+
+        .btn-send {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .btn-send:active {
+            background: #008f72;
+        }
+
+        /* RESULT CARD STYLING (UNTUK JAWABAN BOT) */
+        .res-card {
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        .res-card:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .lbl-lang {
+            display: inline-block;
+            background: #e0f2f1;
+            color: #00695c;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .txt-trans {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 16px;
+        }
+        
+        .txt-origin {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <div class="avatar">A</div>
+            <div class="header-info">
+                <h2>AIRA v8.0</h2>
+                <p>Bot Penerjemah Daerah (Lengkap)</p>
+            </div>
+        </div>
+
+        <div class="lang-bar">
+            <select id="langMode" class="lang-select">
+                <option value="auto">✨ Otomatis (Deteksi Dua Arah)</option>
+                <optgroup label="Bahasa Paser">
+                    <option value="paser_indo">🔵 Paser ⮕ Indonesia</option>
+                    <option value="indo_paser">🔵 Indonesia ⮕ Paser</option>
+                </optgroup>
+                <optgroup label="Bahasa Banjar">
+                    <option value="banjar_indo">🟡 Banjar ⮕ Indonesia</option>
+                    <option value="indo_banjar">🟡 Indonesia ⮕ Banjar</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="chat-box" id="chatContainer">
+            </div>
+
+        <div class="footer">
+            <input type="text" id="userInput" class="input-field" placeholder="Ketik pesan..." autocomplete="off">
+            <button class="btn-send" id="sendBtn">➤</button>
+        </div>
+    </div>
+
+    <script>
+        // Inisialisasi Database Array
+        let dictionary = [];
+    // --- MULAI DATABASE ---
+    dictionary = [
+        
+        // === BAHASA PASER: REQUEST MANUAL USER ===
+        { l: 'Paser', i: 'panas', d: 'langot' },
+        { l: 'Paser', i: 'betul', d: 'beta' },
+        { l: 'Paser', i: 'apa', d: 'ise' },
+        { l: 'Paser', i: 'di', d: 'mo' },
+        { l: 'Paser', i: 'dimana', d: 'mo mone' },
+        { l: 'Paser', i: 'mana', d: 'mone' },
+        { l: 'Paser', i: 'nama', d: 'karan' },
+        { l: 'Paser', i: 'besar', d: 'olai / olay' },
+        { l: 'Paser', i: 'kecil', d: 'alus / idik' },
+        { l: 'Paser', i: 'mata', d: 'mato' },
+        { l: 'Paser', i: 'tidur', d: 'turi' },
+        { l: 'Paser', i: 'jalan', d: 'malan' },
+        { l: 'Paser', i: 'celana', d: 'seloar' },
+        { l: 'Paser', i: 'kencing', d: 'moni' },
+        { l: 'Paser', i: 'mandi', d: 'undus' },
+        { l: 'Paser', i: 'bagus', d: 'buen / moo' },
+        { l: 'Paser', i: 'anjing', d: 'koko' },
+        { l: 'Paser', i: 'ayam', d: 'piak' },
+        { l: 'Paser', i: 'monyet', d: 'boruk' },
+        { l: 'Paser', i: 'buaya', d: 'bayo' },
+        { l: 'Paser', i: 'ikan', d: 'esa' },
+        { l: 'Paser', i: 'tidak', d: 'belo / bela' },
+        { l: 'Paser', i: 'itu', d: 'yede' },
+        { l: 'Paser', i: 'kah', d: 'beh' },
+        { l: 'Paser', i: 'masak', d: 'ensak' },
+        { l: 'Paser', i: 'merah', d: 'mea' },
+        { l: 'Paser', i: 'kuning', d: 'lemit' },
+        { l: 'Paser', i: 'putih', d: 'bura' },
+        { l: 'Paser', i: 'hitam', d: 'buyung' },
+        { l: 'Paser', i: 'dalam', d: 'lontop' },
+        { l: 'Paser', i: 'tenggelam', d: 'lontop' },
+        { l: 'Paser', i: 'astaga', d: 'kole' },
+        { l: 'Paser', i: 'sini', d: 'mendo' },
+        { l: 'Paser', i: 'dulu', d: 'dile' },
+        { l: 'Paser', i: 'jangan', d: 'nang' },
+        { l: 'Paser', i: 'ambil', d: 'andek' },
+        { l: 'Paser', i: 'berkelahi', d: 'bejagur' },
+        { l: 'Paser', i: 'kenyang', d: 'boting' },
+        { l: 'Paser', i: 'hari', d: 'olo' },
+        { l: 'Paser', i: 'bilang', d: 'entang' },
+        { l: 'Paser', i: 'dia', d: 'iyo / yo' },
+        { l: 'Paser', i: 'hantam', d: 'tunjang' },
+        { l: 'Paser', i: 'uang', d: 'sen' },
+        { l: 'Paser', i: 'ada', d: 'keo' },
+        { l: 'Paser', i: 'ingat', d: 'kesowot' },
+        { l: 'Paser', i: 'bertemu', d: 'pengkono' },
+        { l: 'Paser', i: 'ini', d: 'endo' },
+        { l: 'Paser', i: 'kasih', d: 'mere' },
+        { l: 'Paser', i: 'beri', d: 'mere' },
+        { l: 'Paser', i: 'kalian', d: 'ikam / sikam' },
+        { l: 'Paser', i: 'lihat', d: 'mite' },
+        { l: 'Paser', i: 'kampung', d: 'kampong' },
+        { l: 'Paser', i: 'kita', d: 'kain / taka' },
+        { l: 'Paser', i: 'tinggal', d: 'penape' },
+        { l: 'Paser', i: 'ramai', d: 'roa' },
+        { l: 'Paser', i: 'tempat', d: 'ala' },
+        { l: 'Paser', i: 'kosong', d: 'sae' },
+        { l: 'Paser', i: 'masih', d: 'aso' },
+        { l: 'Paser', i: 'banyak', d: 'deo' },
+        { l: 'Paser', i: 'sungai', d: 'loak' },
+        { l: 'Paser', i: 'orang', d: 'ulun' },
+
+        // === BAHASA PASER: KATA GANTI & DASAR TAMBAHAN ===
+        { l: 'Paser', i: 'saya', d: 'Saku' },
+        { l: 'Paser', i: 'kamu', d: 'iko / ko' },
+        { l: 'Paser', i: 'siapa', d: 'ise / se' },
+        { l: 'Paser', i: 'bapak', d: 'uma / bapa' },
+        { l: 'Paser', i: 'ibu', d: 'ine / ema' },
+        { l: 'Paser', i: 'kakak', d: 'andi' },
+        { l: 'Paser', i: 'adik', d: 'okong' },
+        { l: 'Paser', i: 'paman', d: 'uda' },
+        { l: 'Paser', i: 'bibi', d: 'mena' },
+        { l: 'Paser', i: 'kakek', d: 'kai / dato' },
+        { l: 'Paser', i: 'nenek', d: 'nenek / dato' },
+        { l: 'Paser', i: 'laki-laki', d: 'song' },
+        { l: 'Paser', i: 'perempuan', d: 'bawe' },
+        { l: 'Paser', i: 'anak', d: 'pea' },
+                // === BAHASA PASER: KATA KERJA & AKTIVITAS ===
+        { l: 'Paser', i: 'makan', d: 'kuman' },
+        { l: 'Paser', i: 'minum', d: 'ngisop' },
+        { l: 'Paser', i: 'bangun', d: 'uat' },
+        { l: 'Paser', i: 'lari', d: 'monsit' },
+        { l: 'Paser', i: 'duduk', d: 'tunge' },
+        { l: 'Paser', i: 'berdiri', d: 'tari' },
+        { l: 'Paser', i: 'dengar', d: 'nengor' },
+        { l: 'Paser', i: 'bicara', d: 'bebao / isou' },
+        { l: 'Paser', i: 'kerja', d: 'begawi / gawi' },
+        { l: 'Paser', i: 'kerjaan', d: 'gawian' },
+        { l: 'Paser', i: 'pulang', d: 'uli' },
+        { l: 'Paser', i: 'pergi', d: 'lalo' },
+        { l: 'Paser', i: 'beli', d: 'moli' },
+        { l: 'Paser', i: 'jual', d: 'neor' },
+        { l: 'Paser', i: 'cari', d: 'meto' },
+        { l: 'Paser', i: 'bawa', d: 'moit' },
+        { l: 'Paser', i: 'cuci', d: 'nampik' },
+        { l: 'Paser', i: 'keluar', d: 'baling' },
+        { l: 'Paser', i: 'masuk', d: 'sumba' },
+        { l: 'Paser', i: 'datang', d: 'pika / ika' },
+        
+        // === BAHASA PASER: SIFAT, ALAM & WAKTU ===
+        { l: 'Paser', i: 'dingin', d: 'senir / roni' },
+        { l: 'Paser', i: 'sakit', d: 'boar' },
+        { l: 'Paser', i: 'sehat', d: 'sehat' },
+        { l: 'Paser', i: 'cepat', d: 'gesik' },
+        { l: 'Paser', i: 'lambat', d: 'memel / lambat' },
+        { l: 'Paser', i: 'baru', d: 'bayu' },
+        { l: 'Paser', i: 'lama', d: 'usang' },
+        { l: 'Paser', i: 'takut', d: 'taut' },
+        { l: 'Paser', i: 'berani', d: 'gwani' },
+        { l: 'Paser', i: 'lapar', d: 'selau' },
+        { l: 'Paser', i: 'air', d: 'danum' },
+        { l: 'Paser', i: 'api', d: 'apui' },
+        { l: 'Paser', i: 'tanah', d: 'tana' },
+        { l: 'Paser', i: 'batu', d: 'batu' },
+        { l: 'Paser', i: 'angin', d: 'riut' },
+        { l: 'Paser', i: 'hujan', d: 'udan' },
+        { l: 'Paser', i: 'hutan', d: 'alas' },
+        { l: 'Paser', i: 'langit', d: 'langit' },
+        { l: 'Paser', i: 'matahari', d: 'mato olo' },
+        { l: 'Paser', i: 'bulan', d: 'bula' },
+        { l: 'Paser', i: 'bintang', d: 'bintang' },
+        { l: 'Paser', i: 'pagi', d: 'ema-ema / matoolo' },
+        { l: 'Paser', i: 'siang', d: 'molo' },
+        { l: 'Paser', i: 'sore', d: 'nayap' },
+        { l: 'Paser', i: 'malam', d: 'malom' },
+        { l: 'Paser', i: 'besok', d: 'manin' },
+        { l: 'Paser', i: 'kemarin', d: 'koni' },
+
+        // === BAHASA BANJAR: DASAR & GANTI ===
+        { l: 'Banjar', i: 'saya', d: 'ulun (halus) / unda (akrab) / aku' },
+        { l: 'Banjar', i: 'kamu', d: 'pian (halus) / nyawa (akrab) / ikam' },
+        { l: 'Banjar', i: 'dia', d: 'sidin (halus) / inya' },
+        { l: 'Banjar', i: 'mereka', d: 'bubuhannya' },
+        { l: 'Banjar', i: 'kita', d: 'kita / sabarataan' },
+        { l: 'Banjar', i: 'ayah', d: 'abah' },
+        { l: 'Banjar', i: 'ibu', d: 'uma / mama' },
+        { l: 'Banjar', i: 'kakak', d: 'kaka' },
+        { l: 'Banjar', i: 'adik', d: 'ading' },
+        { l: 'Banjar', i: 'paman', d: 'mamarina / paman' },
+        { l: 'Banjar', i: 'bibi', d: 'acil' },
+        { l: 'Banjar', i: 'kakek', d: 'kai' },
+        { l: 'Banjar', i: 'nenek', d: 'nini' },
+        { l: 'Banjar', i: 'suami', d: 'laki' },
+        { l: 'Banjar', i: 'istri', d: 'bini' },
+                // === BAHASA BANJAR: KATA KERJA (VERBA) ===
+        { l: 'Banjar', i: 'tidur', d: 'guring' },
+        { l: 'Banjar', i: 'makan', d: 'makan' },
+        { l: 'Banjar', i: 'minum', d: 'minum' },
+        { l: 'Banjar', i: 'pergi', d: 'tulak' },
+        { l: 'Banjar', i: 'pulang', d: 'bulik' },
+        { l: 'Banjar', i: 'kerja', d: 'bagawi' },
+        { l: 'Banjar', i: 'kerjaan', d: 'gawian' },
+        { l: 'Banjar', i: 'duduk', d: 'baduduk' },
+        { l: 'Banjar', i: 'berdiri', d: 'badiri' },
+        { l: 'Banjar', i: 'jalan', d: 'bajalan' },
+        { l: 'Banjar', i: 'lihat', d: 'melihat / manjanaki' },
+        { l: 'Banjar', i: 'tunggu', d: 'mahadang' },
+        { l: 'Banjar', i: 'beli', d: 'manukar' },
+        { l: 'Banjar', i: 'jual', d: 'bajual' },
+        { l: 'Banjar', i: 'masak', d: 'bamasak' },
+        { l: 'Banjar', i: 'mandi', d: 'mandi' },
+        { l: 'Banjar', i: 'cuci', d: 'bapasuh' },
+        { l: 'Banjar', i: 'jatuh', d: 'gugur' },
+        { l: 'Banjar', i: 'tenggelam', d: 'lamas' },
+        { l: 'Banjar', i: 'kelahi', d: 'bakalahi' },
+        { l: 'Banjar', i: 'marah', d: 'sarik' },
+        { l: 'Banjar', i: 'tertawa', d: 'tatawa' },
+        { l: 'Banjar', i: 'senyum', d: 'kurihing' },
+        { l: 'Banjar', i: 'nangis', d: 'manangis' },
+
+        // === BAHASA BANJAR: SIFAT (ADJEKTIVA) ===
+        { l: 'Banjar', i: 'cantik', d: 'bungas / langkar' },
+        { l: 'Banjar', i: 'ganteng', d: 'bungas' },
+        { l: 'Banjar', i: 'jelek', d: 'kada bungas' },
+        { l: 'Banjar', i: 'bodoh', d: 'bungul / tambuk' },
+        { l: 'Banjar', i: 'pintar', d: 'pintar / harat' },
+        { l: 'Banjar', i: 'malas', d: 'koler / panguier' },
+        { l: 'Banjar', i: 'rajin', d: 'cangkal / rajin' },
+        { l: 'Banjar', i: 'senang', d: 'himung' },
+        { l: 'Banjar', i: 'malu', d: 'supan' },
+        { l: 'Banjar', i: 'sakit', d: 'garing' },
+        { l: 'Banjar', i: 'sehat', d: 'waras / sehat' },
+        { l: 'Banjar', i: 'kaya', d: 'sugih' },
+        { l: 'Banjar', i: 'miskin', d: 'bansaik' },
+        { l: 'Banjar', i: 'besar', d: 'ganal' },
+        { l: 'Banjar', i: 'kecil', d: 'halus' },
+        { l: 'Banjar', i: 'banyak', d: 'banyak' },
+        { l: 'Banjar', i: 'sedikit', d: 'sadikit' },
+        { l: 'Banjar', i: 'panas', d: 'panas' },
+        { l: 'Banjar', i: 'dingin', d: 'dingin' },
+        { l: 'Banjar', i: 'nakal', d: 'wancuh / nakal' },
+        { l: 'Banjar', i: 'pusing', d: 'pusing / muyak' },
+        { l: 'Banjar', i: 'sangat', d: 'banar' }, // "Bungas banar" -> Cantik banget
+
+        // === BAHASA BANJAR: WAKTU & BENDA ===
+        { l: 'Banjar', i: 'pagi', d: 'baisukan' },
+        { l: 'Banjar', i: 'siang', d: 'tengah hari' },
+        { l: 'Banjar', i: 'sore', d: 'kamarian' },
+        { l: 'Banjar', i: 'malam', d: 'malam' },
+        { l: 'Banjar', i: 'besok', d: 'isuk' },
+        { l: 'Banjar', i: 'kemarin', d: 'sumalam' },
+        { l: 'Banjar', i: 'nanti', d: 'kaina' },
+        { l: 'Banjar', i: 'rumah', d: 'rumah / wadah' },
+        { l: 'Banjar', i: 'air', d: 'banyu' },
+        { l: 'Banjar', i: 'ikan', d: 'iwak' },
+        { l: 'Banjar', i: 'nasi', d: 'nasi' },
+        { l: 'Banjar', i: 'sungai', d: 'batang banyu' },
+        { l: 'Banjar', i: 'uang', d: 'duit' },
+        { l: 'Banjar', i: 'pasar', d: 'pasar' },
+        { l: 'Banjar', i: 'jembatan', d: 'jambatan' },
+        
+        // === BAHASA BANJAR: KATA TANYA & LAINNYA ===
+        { l: 'Banjar', i: 'apa', d: 'apa / napa' },
+        { l: 'Banjar', i: 'kenapa', d: 'kanapa' },
+        { l: 'Banjar', i: 'siapa', d: 'siapa' },
+        { l: 'Banjar', i: 'kapan', d: 'pabila' },
+        { l: 'Banjar', i: 'dimana', d: 'dimana' },
+        { l: 'Banjar', i: 'kemana', d: 'kamana' },
+        { l: 'Banjar', i: 'kabar', d: 'habar' },
+        { l: 'Banjar', i: 'mau', d: 'handak / hakun' },
+        { l: 'Banjar', i: 'tidak', d: 'kada / nda' },
+        { l: 'Banjar', i: 'iya', d: 'inggih (halus) / i\'ih' },
+        { l: 'Banjar', i: 'ada', d: 'ada' },
+        { l: 'Banjar', i: 'kalau', d: 'amun / mun' }
+
+    ]; 
+    // --- AKHIR DATABASE --text-secondary
+        // --- KONFIGURASI SISTEM ---
+    
+    // Mengambil elemen dari HTML
+    const chatContainer = document.getElementById('chatContainer');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const langMode = document.getElementById('langMode');
+
+    // Fungsi dijalankan saat aplikasi pertama kali dibuka
+    function init() {
+        // Pesan sambutan dari AIRA
+        const welcomeText = `
+            Halo! 👋 Saya <b>AIRA v8.0</b>.<br><br>
+            Database saya sudah lengkap dengan kosakata Paser & Banjar yang kamu minta.<br><br>
+            <b>Fitur Baru:</b><br>
+            ✅ Pilihan Arah Bahasa (Cek menu di atas)<br>
+            ✅ Terjemahan Kalimat (Word-by-Word)<br>
+            ✅ Singkatan (Ko = Iko, Nda = Kada)<br><br>
+            Silakan ketik: <i>"Ise karan iko"</i> atau <i>"Bungas banar"</i>.
+        `;
+        addMsg('aira', welcomeText);
+    }
+
+    // Fungsi Helper: Menambah Gelembung Chat ke Layar
+    // role: 'aira' (kiri/putih) atau 'user' (kanan/hijau)
+    // html: isi pesan (bisa text atau HTML tag)
+    function addMsg(role, html) {
+        // 1. Buat elemen div baru untuk pesan
+        const div = document.createElement('div');
+        div.className = `msg ${role}`;
+        
+        // 2. Ambil waktu sekarang
+        const now = new Date();
+        const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        // 3. Isi div dengan pesan + waktu
+        div.innerHTML = html + `<div class="time">${timeString}</div>`;
+        
+        // 4. Masukkan ke dalam container chat
+        chatContainer.appendChild(div);
+        
+        // 5. Auto Scroll ke paling bawah agar pesan baru terlihat
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Fungsi Helper: Kapitalisasi Huruf Pertama (cantik -> Cantik)
+    function capitalize(str) {
+        if(!str) return str;
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+    // --- EVENT LISTENERS (Menunggu Input User) ---
+
+    // 1. Jika tombol panah (Kirim) diklik
+    sendBtn.addEventListener('click', handleChat);
+
+    // 2. Jika tombol Enter ditekan di keyboard
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleChat();
+    });
+
+    // --- FUNGSI UTAMA: MEMPROSES CHAT ---
+    function handleChat() {
+        // Ambil teks dari input box
+        const rawText = userInput.value.trim();
+
+        // Jika kosong, jangan lakukan apa-apa
+        if (!rawText) return;
+
+        // Tampilkan pesan User di layar (Bubble Hijau)
+        addMsg('user', rawText);
+
+        // Kosongkan input box setelah kirim
+        userInput.value = '';
+
+        // Tampilkan indikator "Sedang mengetik..." (Opsional/Simulasi Delay)
+        // Kita pakai setTimeout agar terasa seperti mikir 0.6 detik
+        setTimeout(() => {
+            processTranslation(rawText);
+        }, 600);
+    }
+
+    // --- LOGIKA PENERJEMAHAN (INTI SISTEM) ---
+    function processTranslation(text) {
+        // 1. Bersihkan Teks
+        // Ubah ke huruf kecil & hapus tanda baca (! ? . ,)
+        const cleanText = text.toLowerCase().replace(/[?!.,]/g, '');
+        
+        // 2. Pecah menjadi Array Kata
+        // Contoh: "Ise kabar ko" -> ["ise", "kabar", "ko"]
+        const words = cleanText.split(/\s+/);
+
+        // 3. Siapkan Variabel Penampung Hasil
+        let translatedWords = [];
+        let detectedLang = "Deteksi"; 
+        
+        // 4. Ambil Mode Bahasa dari Dropdown (Penting!)
+        // Nilai: 'auto', 'paser_indo', 'indo_paser', 'banjar_indo', 'indo_banjar'
+        const mode = langMode.value;
+
+        // (Logika Looping & Pencarian Kamus akan ada di PART 7 & 8)
+        // --- 5. Mulai Loop: Cek Setiap Kata ---
+        words.forEach(word => {
+            let match = null;
+
+            // KASUS A: Mode Spesifik (INDONESIA KE DAERAH)
+            // User memilih "Indonesia ⮕ Paser" atau "Indonesia ⮕ Banjar"
+            if (mode === 'indo_paser' || mode === 'indo_banjar') {
+                
+                // Tentukan target bahasa (Paser atau Banjar)
+                const targetLang = (mode === 'indo_paser') ? 'Paser' : 'Banjar';
+                detectedLang = `Indo ⮕ ${targetLang}`;
+
+                // Cari kata Indonesia-nya di database
+                // Syarat: Bahasanya harus sesuai target DAN kata indonesianya cocok
+                match = dictionary.find(item => 
+                    item.l === targetLang && item.i.toLowerCase() === word
+                );
+
+                if (match) {
+                    // Jika ketemu, ambil kata daerahnya
+                    // (jika ada "iko / ko", ambil yang pertama "iko")
+                    translatedWords.push(match.d.split(' / ')[0]); 
+                } else {
+                    // Jika tidak ketemu, biarkan kata aslinya (jangan diubah)
+                    translatedWords.push(word);
+                }
+            }
+
+            // KASUS B: Mode Spesifik (DAERAH KE INDONESIA)
+            // User memilih "Paser ⮕ Indonesia" atau "Banjar ⮕ Indonesia"
+            else if (mode === 'paser_indo' || mode === 'banjar_indo') {
+                
+                // Tentukan asal bahasa
+                const sourceLang = (mode === 'paser_indo') ? 'Paser' : 'Banjar';
+                detectedLang = `${sourceLang} ⮕ Indo`;
+
+                // Cari kata Daerah-nya
+                // Kita harus cek variasi singkatan juga (contoh: "ko" harus cocok dengan "iko / ko")
+                match = dictionary.find(item => {
+                    // Pastikan bahasanya benar dulu
+                    if (item.l !== sourceLang) return false;
+                    
+                    // Pecah string database "iko / ko" menjadi array ["iko", "ko"]
+                    const variations = item.d.toLowerCase().split(' / ');
+                    
+                    // Cek apakah kata yang diketik user ada di dalam array itu
+                    return variations.includes(word);
+                });
+
+                if (match) {
+                    // Jika ketemu, ambil kata Indonesianya
+                    translatedWords.push(match.i);
+                } else {
+                    // Jika tidak ketemu, biarkan kata aslinya
+                    translatedWords.push(word);
+                }
+            }
+                        // KASUS C: Mode OTOMATIS (Deteksi Dua Arah)
+            // Jika user memilih "✨ Otomatis (Deteksi Semua)"
+            else {
+                detectedLang = "Otomatis";
+                
+                // LANGKAH 1: Cek apakah ini kata DAERAH? (Paser/Banjar ⮕ Indo)
+                // Kita cari di kolom 'd' (daerah)
+                match = dictionary.find(item => {
+                    const variations = item.d.toLowerCase().split(' / ');
+                    return variations.includes(word);
+                });
+
+                if (match) {
+                    // Ketemu! Berarti ini kata daerah.
+                    // Terjemahkan ke Indonesia.
+                    translatedWords.push(match.i);
+                } 
+                else {
+                    // LANGKAH 2: Cek apakah ini kata INDONESIA? (Indo ⮕ Daerah)
+                    // Kita cari di kolom 'i' (indo)
+                    match = dictionary.find(item => item.i.toLowerCase() === word);
+                    
+                    if (match) {
+                        // Ketemu! Berarti ini kata Indonesia.
+                        // Terjemahkan ke Daerah (Ambil kata pertama jika ada variasi)
+                        translatedWords.push(match.d.split(' / ')[0]);
+                    } else {
+                        // LANGKAH 3: Tidak ketemu di manapun
+                        // Biarkan kata aslinya (mungkin nama orang atau kata umum)
+                        translatedWords.push(word);
+                    }
+                }
+            }
+        }); 
+        // --- Akhir dari Loop (forEach) ---
+
+        // --- 6. PENYUSUNAN HASIL ---
+        
+        // Gabungkan array kata menjadi kalimat utuh kembali
+        // Contoh: ["apa", "kabar", "kamu"] -> "apa kabar kamu"
+        const finalSentence = translatedWords.join(' ');
+
+        // Rapikan huruf pertama jadi Kapital
+        const capitalizedSentence = finalSentence.charAt(0).toUpperCase() + finalSentence.slice(1);
+                // --- 7. TAMPILKAN HASIL KE LAYAR ---
+
+        // Kita susun HTML untuk gelembung chat AIRA.
+        // Menggunakan class CSS 'res-card' yang sudah kita buat di Part 1.
+        
+        let htmlResponse = `
+            <div class="res-card">
+                <span class="lbl-lang">${detectedLang}</span>
+                
+                <div class="txt-origin">"${text}"</div>
+                
+                <div class="txt-trans">${capitalizedSentence}</div>
+            </div>
+        `;
+
+        // Panggil fungsi helper 'addMsg' (dari Part 5) untuk memunculkan pesan
+        addMsg('aira', htmlResponse);
+
+        // Pastikan layar scroll ke paling bawah agar hasil terlihat
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    } // --- AKHIR FUNGSI processTranslation ---
+
+    // Jalankan inisialisasi saat script selesai dimuat
+    init();
+        // --- AKHIR DARI SCRIPT AIRA ---
+    // Created by Ahmad Ramlansyah
+    
+    </script>
+</body>
+</html>
